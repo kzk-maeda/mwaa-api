@@ -15,30 +15,45 @@ class MWAA_v2:
     self.mwaa_webserver_hostname = 'https://{0}/aws_mwaa/cli'.format(mwaa_cli_token['WebServerHostname'])
 
   def list_dugs(self) -> str:
+    '''
+    https://airflow.apache.org/docs/apache-airflow/2.0.2/cli-and-env-variables-ref.html#list_repeat2
+    '''
     raw_data = "dags list -o json"
     out = self._run(raw_data)
 
     return out
   
   def list_runs(self) -> str:
+    '''
+    https://airflow.apache.org/docs/apache-airflow/2.0.2/cli-and-env-variables-ref.html#list-runs
+    '''
     raw_data = 'dags list-runs -o json'
     out = self._run(raw_data)
 
     return out
   
   def trigger(self, dag_id: str) -> str:
+    '''
+    https://airflow.apache.org/docs/apache-airflow/2.0.2/cli-and-env-variables-ref.html#trigger
+    '''
     raw_data = f'dags trigger {dag_id}'
     out = self._run(raw_data)
 
     return out
   
   def state(self, dag_id: str, run_id: str) -> str:
+    '''
+    https://airflow.apache.org/docs/apache-airflow/2.0.2/cli-and-env-variables-ref.html#state
+    '''
     raw_data = f'dags state'
     out = self._run(raw_data)
 
     return out
   
   def _run(self, raw_data) -> str:
+    '''
+    Common method called to run API to MWAA
+    '''
     response = requests.post(
       self.mwaa_webserver_hostname,
       headers={
