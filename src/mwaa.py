@@ -14,25 +14,31 @@ class MWAA_v2:
     self.mwaa_auth_token = 'Bearer ' + mwaa_cli_token['CliToken']
     self.mwaa_webserver_hostname = 'https://{0}/aws_mwaa/cli'.format(mwaa_cli_token['WebServerHostname'])
 
-  def list_dugs(self):
+  def list_dugs(self) -> str:
     raw_data = "dags list -o json"
-    err, out = self._run(raw_data)
-    if err:
-      print(err)
-      raise
+    out = self._run(raw_data)
 
     return out
   
-  def list_runs(self):
+  def list_runs(self) -> str:
     raw_data = 'dags list-runs -o json'
-    err, out = self._run(raw_data)
-    if err:
-      print(err)
-      raise
+    out = self._run(raw_data)
 
     return out
   
-  def _run(self, raw_data):
+  def trigger(self, dag_id: str) -> str:
+    raw_data = f'dags trigger {dag_id}'
+    out = self._run(raw_data)
+
+    return out
+  
+  def state(self, dag_id: str, run_id: str) -> str:
+    raw_data = f'dags state'
+    out = self._run(raw_data)
+
+    return out
+  
+  def _run(self, raw_data) -> str:
     response = requests.post(
       self.mwaa_webserver_hostname,
       headers={
@@ -41,8 +47,13 @@ class MWAA_v2:
       },
       data=raw_data
     )
+    response.raise_for_status()
 
     mwaa_std_err_message = base64.b64decode(response.json()['stderr']).decode('utf8')
     mwaa_std_out_message = base64.b64decode(response.json()['stdout']).decode('utf8')
+
+    if mwaa_std_err_message:
+      print(mwaa_std_err_message)
+      raise
     
-    return mwaa_std_err_message, mwaa_std_out_message
+    return mwaa_std_out_message
